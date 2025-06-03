@@ -13,7 +13,7 @@ router.post('/register', [
     check("password", "Пароль повинен бути не менше 8 символів!").isLength({min: 8, max: 255})
 ], authController.regUser);
 router.post('/login', authController.logInUser);
-router.post('/logout', verifyToken, authController.logOutUser);
+router.delete('/logout', verifyToken, authController.logOutUser);
 router.post('/ver', authController.mailСonfirmation);
 router.get('/check-auth', verifyToken, authController.checkAuth);
 router.post('/refresh', authController.refreshToken);

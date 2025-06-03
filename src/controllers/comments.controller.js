@@ -2,7 +2,9 @@ import Comment from "../models/comment.model.js";
 
 class CommentsController {
     createComment = async (req, res) => {
-        const { user_id, post_id, comment_id, content } = req.body;
+        const {post_id, comment_id, content } = req.body;
+        const user_id = req.user.id;
+        
         try {
             const newComment = await Comment.create({ post_id, comment_id, content, user_id });
             if (!newComment) throw Error("Error create comment!");
@@ -67,8 +69,8 @@ class CommentsController {
                 data: commentsList
             });
         } catch (e) {
-            return res.status(400).json({
-                statusCode: 400,
+            return res.status(500).json({
+                statusCode: 500,
                 error: e.message,
                 message: "Помилка при пошуку коментарів!",
                 successful: false,
@@ -80,7 +82,7 @@ class CommentsController {
     getReplyByCommentId = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const offset = parseInt(req.query.offset) || 0;
-        const comment_id = req.params.id;
+        const comment_id = req.params.commentId;
 
         try {
             const replyList = await Comment.findAll({ where: { comment_id }, limit, offset });
@@ -94,8 +96,8 @@ class CommentsController {
                 data: replyList
             });
         } catch (e) {
-            return res.status(400).json({
-                statusCode: 400,
+            return res.status(500).json({
+                statusCode: 500,
                 error: e.message,
                 message: "Помилка у пошуку відповідей!",
                 successful: false,

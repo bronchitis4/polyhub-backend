@@ -1,12 +1,23 @@
-import Teacher from "../models/teacher.model";
-import { Op } from "sequelize";
+import Teacher from "../models/teacher.model.js";
+import { Op, where } from "sequelize";
+import Institute from "../models/institute.model.js";
 
 class TeacherController {
     getAllTeachers = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const offset = parseInt(req.query.offset) || 0;
+        const institute_id = parseInt(req.query.institute_id) || 1;
+        console.log("Ліміт: " + limit)
+        console.log("Офсет: " + offset)
+
+        
         try {
-            const teachers = await Teacher.findAll({ limit, offset });
+            const teachers = await Teacher.findAll({ where: {institute_id}, limit, offset,
+                include: {
+                    model: Institute,
+                    attributes: ["id", "name", "description"]
+            }});
+
             if (!teachers.length) 
                 throw new Error("Teachers not found");
             
@@ -18,8 +29,8 @@ class TeacherController {
                 data: teachers
             });
         } catch (error) {
-            return res.status(400).json({
-                statusCode: 400,
+            return res.status(500).json({
+                statusCode: 500,
                 error: error.message,
                 message: "Помилка при отриманні викладачів!",
                 successful: false,
@@ -61,15 +72,14 @@ class TeacherController {
     }
 
     createTeacher = async (req, res) => {
-
-        const { full_name, institute, bio, email, phone } = req.body;
-        const filePath = req.file ? `${process.env.IP}/uploads/posts/${req.file.filename}` : null;
+        const { full_name, institute_id, bio, email, phone } = req.body;
+        const filePath = req.file ? `${process.env.IP}/uploads/teachers/${req.file.filename}` : null;
 
         try {
             const newTeacher = await Teacher.create({
                 full_name,
-                filePath,
-                institute,
+                image_url: filePath,
+                institute_id,
                 bio,
                 email,
                 phone

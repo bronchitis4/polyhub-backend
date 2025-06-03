@@ -1,4 +1,4 @@
-import sequelize from "../config/db";
+import sequelize from "../config/db.js";
 import { DataTypes } from "sequelize";
 
 const TeacherReview = sequelize.define('teachers_reviews', {
@@ -33,7 +33,7 @@ const TeacherReview = sequelize.define('teachers_reviews', {
         }
     }},
     {
-        tableName: 'teachers',
+        tableName: 'teachers_reviews',
         timestamps: true
     }
 )

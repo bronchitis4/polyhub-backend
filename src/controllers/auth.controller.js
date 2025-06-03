@@ -1,17 +1,15 @@
 
 import pool from '../config/dbConfig.js';
 import hashModule from "../utils/hashUtils.js";
-import { validationResult } from "express-validator";
 import { Mailer } from '../utils/mailer.js';
 import {GenerateTokenModule} from '../utils/jwtToken.js';
 import jwt from 'jsonwebtoken';
-
+import { validationResult } from 'express-validator';
 import User from '../models/user.model.js';
 import TemporaryUser from '../models/user_temporary.model.js';
 import Role from '../models/role.model.js';
 import RefreshToken from '../models/refresh_token.model.js';
 import UserProfile from '../models/user_profile.model.js';
-import { Op } from 'sequelize';
 
 class AuthController {
     constructor() {
@@ -19,7 +17,6 @@ class AuthController {
         this.mailerModule = new Mailer();
         this.generateTokenModule = new GenerateTokenModule();
     }
-    
 
     createUserProfile = async (data) => {
         const newProfile = await UserProfile.create(data);
@@ -67,11 +64,11 @@ class AuthController {
                 password_hash
             }
 
-            if ((await TemporaryUser.findOne({ where: { email } })) !== null) {
+            if ((await User.findOne({ where: { email } })) !== null) {
                 return res.json({
                     statusCode: 400,
                     error: "User already exists",
-                    message: "Користувач із такою поштою вже зареєстрований! Чмо блять!",
+                    message: "Користувач із такою поштою вже зареєстрований",
                     successful: false, 
                     data: req.body      
                 });
@@ -221,8 +218,8 @@ class AuthController {
 
     logOutUser = async (req, res) => {
         try {
-            const {refreshToken} = req.body; 
-            if(!refreshToken) {
+            const user_id = req.user.id; 
+            if(!user_id) {
                 return res.status(400).json({
                     statusCode: 400,
                     error: "Refresh token not found",
@@ -230,7 +227,7 @@ class AuthController {
                 });
             }
 
-            await RefreshToken.destroy({where: {token: refreshToken}});
+            await RefreshToken.destroy({where: {user_id}});
             return res.status(200).json({
                 statusCode: 200,
                 error: null,
@@ -252,7 +249,9 @@ class AuthController {
             res.status(200).json({ 
                 statusCode: 200,
                 error: null,
-                message: "Авторизація пройшла успішно!"
+                message: "Авторизація пройшла успішно!",
+                role: "user",
+                role_name: req.user.role
             })
         }catch(e) {
             return res.json({
@@ -307,7 +306,7 @@ class AuthController {
                     role_name: decoded.role_name,
                 },
                 process.env.JWT_SECRET,
-                { expiresIn: '1h' } // Термін дії 1 година
+                { expiresIn: '1h' } 
             );
     
             const newRefreshToken = jwt.sign(
@@ -320,7 +319,7 @@ class AuthController {
                 { expiresIn: '7d' } 
             );
     
-            const expiresInDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 днів
+            const expiresInDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
             await RefreshToken.update(
                 { token: newRefreshToken, expires_at: expiresInDate },
                 { where: { id: refreshTokenRecord.id } }
@@ -334,7 +333,6 @@ class AuthController {
                 expires: expiresInDate,
             });
     
-            console.log('Sending response with new access token');
             return res.status(200).json({
                 statusCode: 200,
                 error: null,

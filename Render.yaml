@@ -3,7 +3,7 @@ services:
     name: polyhub-backend
     env: node
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: npm src/start
     envVars:
       - key: NODE_ENV
         value: production

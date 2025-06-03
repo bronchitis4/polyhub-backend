@@ -15,9 +15,10 @@ class PostsController {
                     data: []
                 });
             }
-
-            const { user_id, title, content, category_id } = req.body;
-            const filePath = req.file ? `${process.env.IP}/uploads/teachers/${req.file.filename}` : null;
+            
+            const {title, content, category_id } = req.body;
+            const user_id = req.user.id;
+            const filePath = req.file ? `${process.env.IP}/uploads/posts/${req.file.filename}` : null;
 
             const newPost = await Post.create({
                 user_id,
@@ -79,7 +80,9 @@ class PostsController {
             const posts = await Post.findAll({
                 where: { user_id },
                 limit,
-                offset });
+                offset 
+            });
+            
             res.status(200).json({
                 statusCode: 200,
                 error: null,
@@ -220,14 +223,25 @@ class PostsController {
     }
 
     destroyPostById = async (req, res) => {
-        const { id } = req.params;
-        const { user_id } = req.body;
-
+        const postId = req.params.id;
+        const userId = req.headers['user-id'];
+        
         try {
-            const post = await Post.findOne({ where: { id } });
-            if (!post || post.user_id !== user_id) {
-                throw Error("Post not found! No access to delete this post");
+            const post = await Post.findById(postId);
+            
+            const isOwner = post.user_id.toString() === userId;
+            const isAdmin = req.user && req.user.role === 'admin';
+
+            if (!isOwner && !isAdmin) {
+                return res.status(403).json({ 
+                    statusCode: 403,
+                    error: "Only the owner or admin can delete this post",
+                    message: "У вас немає прав на видалення цього поста",
+                    successful: false,
+                    data: {}
+                });
             }
+
 
             const postDestroyed = await Post.destroy({ where: { id } });
             res.status(200).json({

@@ -4,6 +4,10 @@ import postsRouter from './routes/posts.routes.js';
 import commentsRouter from './routes/comments.routes.js';
 import voteRouter from './routes/vote.routes.js'
 import profileRouter from './routes/profile.routes.js'
+import teacherRouter from './routes/teachers.routes.js'
+import categoriesRouter from './routes/categories.routes.js';
+import teachersRouter from './routes/teacherReviews.routes.js'
+import institutesRouter from './routes/institutes.router.js';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -55,6 +59,10 @@ app.use('/posts', postsRouter);
 app.use('/comments', commentsRouter)
 app.use('/votes', voteRouter)
 app.use('/profile', profileRouter)
+app.use('/teachers', teacherRouter)
+app.use('/categories', categoriesRouter)
+app.use('/reviews', teachersRouter)
+app.use('/institutes', institutesRouter)
 
 app.listen(PORT, () => {
     console.log(`Post ${PORT} is listening`)

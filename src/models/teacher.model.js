@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
+import Institute from "./institute.model.js";
 
 const Teacher = sequelize.define("teachers", {
   id: {
@@ -11,11 +12,15 @@ const Teacher = sequelize.define("teachers", {
     type: DataTypes.STRING(150),
     allowNull: false
   },
-  imageUrl: {
+  image_url: {
     type: DataTypes.TEXT
   },
-  institute: {
-    type: DataTypes.STRING(100)
+  institute_id: {
+    type: DataTypes.INTEGER,
+    reference: {
+      model: 'institutes',
+      key: 'id'
+    }
   },
   bio: {
     type: DataTypes.TEXT
@@ -25,14 +30,15 @@ const Teacher = sequelize.define("teachers", {
     validate: {
       isEmail: true
     }
-  },
-  phone: {
-    type: DataTypes.STRING
-  },
-  
+  }
 }, {
   tableName: "teachers",
-  timestamps: true
+  timestamps: true,
+  createdAt: 'createdat', 
+  updatedAt: 'updatedat'
+  
 });
+
+Teacher.belongsTo(Institute, { foreignKey: "institute_id" });
 
 export default Teacher;
