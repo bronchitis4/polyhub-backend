@@ -7,5 +7,5 @@ const votesController = new VotesController();
 router.post('/', verifyToken, votesController.createVote);
 router.get('/:id/postVotes', verifyToken, votesController.getVotesByPostId);
 router.get('/:id/commentVotes', verifyToken, votesController.getVotesByCommentId);
-
+router.get('/user', verifyToken, votesController.getVotesByUserId);
 export default router;
