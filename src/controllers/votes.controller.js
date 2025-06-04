@@ -93,17 +93,20 @@ class VotesController {
 
     getVotesByUserId = async (req, res) => {
         try {
-            const user_id = req.params.id;
-            const votes = Vote.findAll({where: {user_id}});
-            if(!votes.length)
-                throw Error("Votes not founded!");
+            const user_id = req.query.user_id;
+            const post_id = req.query.post_id;
+            const vote = await Vote.findOne({where: {user_id, post_id}});
+            console.log("vote", vote);
+            if(!vote)
+                throw Error("Vote not founded!");
             
+            const data = vote.vote_type == "upvote" ? 1 : -1; 
             res.status(200).json({
                 statusCode: 200,
                 error: null,
                 message: "Голоси знайдено!",
                 successful: true,
-                data: votes
+                data: data
             })
         }catch(e) {
             return res.status(400).json({
