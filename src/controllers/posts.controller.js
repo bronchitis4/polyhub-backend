@@ -1,11 +1,8 @@
 import { validationResult } from 'express-validator';
 import Post from '../models/post.model.js';
 import { where } from 'sequelize';
-import { uploadToDrive } from '../utils/googleUploader.js'; // шлях до файлу з функцією
-
 
 class PostsController {
-
     createPost = async (req, res) => {
         try {
             const errors = validationResult(req);
@@ -18,20 +15,15 @@ class PostsController {
                     data: []
                 });
             }
-
-            const { title, content, category_id } = req.body;
+            
+            const {title, content, category_id } = req.body;
             const user_id = req.user.id;
-
-            let imageUrl = null;
-
-            if (req.file) {
-                imageUrl = await uploadToDrive(req.file); 
-            }
+            const filePath = req.file ? `${process.env.IP}/uploads/posts/${req.file.filename}` : null;
 
             const newPost = await Post.create({
                 user_id,
                 title,
-                imageurl: imageUrl,
+                imageurl: filePath,
                 content,
                 category_id
             });
@@ -53,9 +45,7 @@ class PostsController {
                 data: req.body
             });
         }
-    }
-
-
+    } 
     getPostById = async (req, res) => {
         const { id } = req.params;
         try {
