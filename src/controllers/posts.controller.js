@@ -1,8 +1,11 @@
 import { validationResult } from 'express-validator';
 import Post from '../models/post.model.js';
 import { where } from 'sequelize';
+import { uploadToDrive } from '../utils/googleUploader.js'; // шлях до файлу з функцією
+
 
 class PostsController {
+
     createPost = async (req, res) => {
         try {
             const errors = validationResult(req);
@@ -15,15 +18,20 @@ class PostsController {
                     data: []
                 });
             }
-            
-            const {title, content, category_id } = req.body;
+
+            const { title, content, category_id } = req.body;
             const user_id = req.user.id;
-            const filePath = req.file ? `${process.env.IP}/uploads/posts/${req.file.filename}` : null;
+
+            let imageUrl = null;
+
+            if (req.file) {
+                imageUrl = await uploadToDrive(req.file); 
+            }
 
             const newPost = await Post.create({
                 user_id,
                 title,
-                imageurl: filePath,
+                imageurl: imageUrl,
                 content,
                 category_id
             });
@@ -46,6 +54,7 @@ class PostsController {
             });
         }
     }
+
 
     getPostById = async (req, res) => {
         const { id } = req.params;
@@ -80,9 +89,9 @@ class PostsController {
             const posts = await Post.findAll({
                 where: { user_id },
                 limit,
-                offset 
+                offset
             });
-            
+
             res.status(200).json({
                 statusCode: 200,
                 error: null,
@@ -95,7 +104,7 @@ class PostsController {
                 statusCode: 500,
                 error: e.message,
                 message: "Помилка",
-                successful: false, 
+                successful: false,
                 data: null
             });
         }
@@ -104,13 +113,13 @@ class PostsController {
     // getAllPosts = async (req, res) => {
     //     const limit = parseInt(req.query.limit) || 10;
     //     const offset = parseInt(req.query.offset) || 0;
-    
+
     //     try {
     //         const posts = await Post.findAll({
     //             limit,
     //             offset
     //         });
-    
+
     //         res.status(200).json({
     //             statusCode: 200,
     //             error: null,
@@ -128,7 +137,7 @@ class PostsController {
     //         });
     //     }
     // };
-     
+
 
     // getAllPostsByCategory = async (req, res) => {
     //     const limit = req.query.limit || 10;
@@ -162,17 +171,17 @@ class PostsController {
         const limit = parseInt(req.query.limit) || 10;
         const offset = parseInt(req.query.offset) || 0;
         const category_id = req.query.category_id;
-    
+
         const where = {};
         if (category_id) {
             where.category_id = category_id;
         }
-    
+
         console.log('Запит:', { category_id, limit, offset });
-    
+
         try {
             const posts = await Post.findAll({ where, limit, offset });
-    
+
             res.status(200).json({
                 statusCode: 200,
                 error: null,
@@ -190,7 +199,7 @@ class PostsController {
             });
         }
     };
-    
+
 
     updatePost = async (req, res) => {
         const { id } = req.params;
@@ -225,15 +234,15 @@ class PostsController {
     destroyPostById = async (req, res) => {
         const postId = req.params.id;
         const userId = req.headers['user-id'];
-        
+
         try {
             const post = await Post.findById(postId);
-            
+
             const isOwner = post.user_id.toString() === userId;
             const isAdmin = req.user && req.user.role === 'admin';
 
             if (!isOwner && !isAdmin) {
-                return res.status(403).json({ 
+                return res.status(403).json({
                     statusCode: 403,
                     error: "Only the owner or admin can delete this post",
                     message: "У вас немає прав на видалення цього поста",
