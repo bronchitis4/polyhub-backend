@@ -7,7 +7,7 @@ import { upload } from '../utils/multerConfig.js';
 const router = express.Router();
 const postsController = new PostsController();
 
-router.post('/', verifyToken, checkRole("user"), upload.single('image'), postsController.createPost);
+router.post('/', verifyToken, checkRole("user"), upload.single('file'), postsController.createPost);
 router.get('/', verifyToken, postsController.getAllPosts);
 router.get('/:id', verifyToken, postsController.getPostById);
 router.put('/posts/:id', verifyToken, verifyToken, postsController.updatePost);
