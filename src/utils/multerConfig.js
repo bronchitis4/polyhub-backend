@@ -51,7 +51,7 @@ const storage = multer.memoryStorage();
 
 // Приймаємо лише зображення, наприклад JPEG, PNG
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
+  if (file.mimetype.startsWith('file/')) {
     cb(null, true);
   } else {
     cb(new Error('Тільки зображення дозволені!'), false);
