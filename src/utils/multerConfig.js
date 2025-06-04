@@ -48,9 +48,10 @@ import multer from 'multer';
 
 // Зберігаємо файли у оперативній пам'яті (RAM), а не в файловій системі
 const storage = multer.memoryStorage();
-
 // Приймаємо лише зображення, наприклад JPEG, PNG
 const fileFilter = (req, file, cb) => {
+  conlose.log(file);
+
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {
