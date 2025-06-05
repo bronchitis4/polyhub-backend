@@ -75,9 +75,9 @@ class AuthController {
             }
             
             const generatedCode = this.mailerModule.generateCode();
-            //await this.mailerModule.sendVerificationEmail(email, generatedCode);
-            //data.verification_code = generatedCode;
-            data.verification_code = 1111;
+            await this.mailerModule.sendVerificationEmail(email, generatedCode);
+            data.verification_code = generatedCode;
+            // data.verification_code = 1111;
 
             try {
                 const temporaryUser = await TemporaryUser.create(data);
