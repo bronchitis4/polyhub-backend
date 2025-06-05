@@ -23,7 +23,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://front-polyhub-main.vercel.app/',
     credentials: true, 
 }));
 
@@ -46,7 +46,7 @@ app.use(helmet({
 app.use(express.json());
 app.use(cookieParser());
 app.use('/uploads', cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://front-polyhub-main.vercel.app/',
     methods: ['GET', 'OPTIONS'],
     allowedHeaders: ['Content-Type'],
 }), (req, res, next) => {
